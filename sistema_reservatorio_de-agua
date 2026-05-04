@@ -1,0 +1,159 @@
+import os
+import time
+
+from colorama import Fore, Style, init
+
+
+def limpar_terminal() -> None:
+    """
+    Limpa o terminal de acordo com o sistema operacional.
+
+    No Windows, utiliza o comando 'cls'.
+    Em Linux e macOS, utiliza o comando 'clear'.
+    """
+    os.system("cls" if os.name == "nt" else "clear")
+
+
+def buscar_nivel_reservatorio(nivel_informado: int, niveis: list[dict]) -> dict | None:
+    """
+    Busca as informações do reservatório com base no nível informado.
+
+    A função percorre a lista de níveis cadastrados e retorna o dicionário
+    correspondente ao nível recebido. Caso o nível não exista, retorna None.
+    """
+    for nivel in niveis:
+        if nivel["numero"] == nivel_informado:
+            return nivel
+
+    return None
+
+
+def exibir_relatorio_reservatorio(nivel: dict) -> None:
+    """
+    Exibe o relatório do reservatório com a cor correspondente ao nível.
+
+    A função recebe um dicionário contendo o número do nível, a situação,
+    a cor e o relatório. Após exibir a mensagem colorida, restaura o estilo
+    padrão do terminal usando Style.RESET_ALL.
+    """
+    cor = nivel["cor"]
+
+    print(f"\n{cor}=== Relatório do Reservatório ===")
+    print(f"Nível identificado: {nivel['numero']}")
+    print(f"Situação atual: {nivel['situacao']}")
+    print(f"Análise: {nivel['relatorio']}{Style.RESET_ALL}")
+
+
+def solicitar_nivel_reservatorio() -> int | None:
+    """
+    Solicita ao operador o nível exibido no painel do reservatório.
+
+    A função tenta converter a entrada do usuário para número inteiro.
+    Caso o valor digitado não seja numérico, retorna None para indicar
+    uma entrada inválida.
+    """
+    entrada = input(
+        "Sistema de Monitoramento Iniciado.\n"
+        "Informe o nível demonstrado no painel à sua frente: "
+    )
+
+    if not entrada.isdigit():
+        return None
+
+    return int(entrada)
+
+
+def main() -> None:
+    """
+    Executa o sistema de monitoramento do reservatório.
+
+    A função inicializa o colorama, define os níveis possíveis do sistema,
+    solicita o nível atual ao operador, exibe o relatório correspondente
+    e limpa o terminal automaticamente após alguns segundos.
+    """
+    init(autoreset=False)
+
+    niveis_reservatorio = [
+        {
+            "numero": 1,
+            "situacao": "Muito baixo (crítico)",
+            "cor": Fore.RED,
+            "relatorio": (
+                "O reservatório está em estado crítico. "
+                "O nível de água está muito abaixo do ideal, podendo "
+                "comprometer o abastecimento. É necessário acionar uma "
+                "verificação imediata e priorizar o reabastecimento."
+            ),
+        },
+        {
+            "numero": 2,
+            "situacao": "Baixo",
+            "cor": Fore.YELLOW,
+            "relatorio": (
+                "O reservatório está abaixo do nível recomendado. "
+                "Ainda não há uma situação crítica, mas é importante "
+                "acompanhar a evolução do consumo e evitar desperdícios."
+            ),
+        },
+        {
+            "numero": 3,
+            "situacao": "Médio",
+            "cor": Fore.GREEN,
+            "relatorio": (
+                "O reservatório está em uma condição estável. "
+                "O nível de água é considerado adequado para operação "
+                "normal, sem necessidade de intervenção imediata."
+            ),
+        },
+        {
+            "numero": 4,
+            "situacao": "Alto",
+            "cor": Fore.CYAN,
+            "relatorio": (
+                "O reservatório apresenta um nível elevado de água. "
+                "A situação é positiva, mas o monitoramento deve continuar "
+                "para garantir que o volume permaneça dentro dos limites seguros."
+            ),
+        },
+        {
+            "numero": 5,
+            "situacao": "Muito alto (alerta)",
+            "cor": Fore.BLUE,
+            "relatorio": (
+                "O reservatório está muito próximo da capacidade máxima. "
+                "É recomendado acompanhar o sistema com atenção para evitar "
+                "transbordamento ou pressão excessiva na estrutura."
+            ),
+        },
+    ]
+
+    nivel_informado = solicitar_nivel_reservatorio()
+
+    if nivel_informado is None:
+        print(f"{Fore.RED}Entrada inválida. Informe apenas números.{Style.RESET_ALL}")
+        time.sleep(4)
+        limpar_terminal()
+        return
+
+    nivel_encontrado = buscar_nivel_reservatorio(
+        nivel_informado=nivel_informado,
+        niveis=niveis_reservatorio,
+    )
+
+    if nivel_encontrado is None:
+        print(
+            f"{Fore.RED}Nível inválido. "
+            f"Informe um valor entre 1 e 5.{Style.RESET_ALL}"
+        )
+        time.sleep(4)
+        limpar_terminal()
+        return
+
+    exibir_relatorio_reservatorio(nivel_encontrado)
+
+    time.sleep(12)
+    limpar_terminal()
+
+
+if __name__ == "__main__":
+    main()
